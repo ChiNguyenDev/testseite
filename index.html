@@ -1,0 +1,998 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Valentinstag Quiz</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        /* CSS Variables - Grau/Blau Theme (Standard) */
+        :root {
+            --primary-color: #3498DB;
+            --primary-hover: #2980B9;
+            --secondary-color: #2C3E50;
+            --accent-color: #5DADE2;
+            --background-gradient: linear-gradient(135deg, #ECF0F1 0%, #D5DBDB 50%, #BDC3C7 100%);
+            --card-bg: rgba(255, 255, 255, 0.95);
+            --text-color: #2C3444;
+            --text-light: #5D6D7E;
+            --shadow-color: rgba(44, 62, 80, 0.15);
+            --success-color: #27AE60;
+            --error-color: #E74C3C;
+            --progress-bg: #ECF0F1;
+            --progress-fill: linear-gradient(90deg, #3498DB, #5DADE2);
+            --transition-duration: 0.8s;
+        }
+
+        /* Pink Theme */
+        body.pink-theme {
+            --primary-color: #FF6B9D;
+            --primary-hover: #FF4081;
+            --secondary-color: #FFB3C6;
+            --accent-color: #FF85A2;
+            --background-gradient: linear-gradient(135deg, #FFE5EC 0%, #FFB3C6 50%, #FF85A2 100%);
+            --card-bg: rgba(255, 255, 255, 0.9);
+            --text-color: #2D3436;
+            --text-light: #636E72;
+            --shadow-color: rgba(255, 107, 157, 0.25);
+            --progress-bg: #FFE5EC;
+            --progress-fill: linear-gradient(90deg, #FF6B9D, #FF85A2);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            min-height: 100vh;
+            background: var(--background-gradient);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            transition: background var(--transition-duration) ease;
+            overflow-x: hidden;
+        }
+
+        .quiz-container {
+            background: var(--card-bg);
+            border-radius: 24px;
+            padding: 40px;
+            max-width: 600px;
+            width: 100%;
+            box-shadow: 0 20px 60px var(--shadow-color);
+            transition: all var(--transition-duration) ease;
+            position: relative;
+            z-index: 10;
+        }
+
+        .progress-container {
+            margin-bottom: 30px;
+        }
+
+        .progress-text {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+            font-size: 14px;
+            color: var(--text-light);
+            transition: color var(--transition-duration) ease;
+        }
+
+        .progress-bar {
+            height: 8px;
+            background: var(--progress-bg);
+            border-radius: 10px;
+            overflow: hidden;
+            transition: background var(--transition-duration) ease;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: var(--progress-fill);
+            border-radius: 10px;
+            transition: width 0.5s ease, background var(--transition-duration) ease;
+            width: 0%;
+        }
+
+        .question-container {
+            text-align: center;
+            animation: fadeIn 0.5s ease;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            20% { transform: translateX(-10px); }
+            40% { transform: translateX(10px); }
+            60% { transform: translateX(-10px); }
+            80% { transform: translateX(10px); }
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0) rotate(0deg); }
+            50% { transform: translateY(-20px) rotate(10deg); }
+        }
+
+        .question-number {
+            font-size: 14px;
+            color: var(--primary-color);
+            font-weight: 600;
+            margin-bottom: 10px;
+            transition: color var(--transition-duration) ease;
+        }
+
+        .question-text {
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--text-color);
+            margin-bottom: 30px;
+            line-height: 1.4;
+            transition: color var(--transition-duration) ease;
+        }
+
+        .answers-container {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .answer-btn {
+            padding: 16px 24px;
+            font-size: 16px;
+            font-family: 'Poppins', sans-serif;
+            font-weight: 500;
+            border: 2px solid transparent;
+            border-radius: 12px;
+            background: var(--primary-color);
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .answer-btn:hover {
+            background: var(--primary-hover);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px var(--shadow-color);
+        }
+
+        .answer-btn:active {
+            transform: translateY(0);
+        }
+
+        .answer-btn.correct {
+            background: var(--success-color);
+            animation: pulse 0.5s ease;
+        }
+
+        .answer-btn.wrong {
+            background: var(--error-color);
+            animation: shake 0.5s ease;
+        }
+
+        .answer-btn:disabled {
+            cursor: not-allowed;
+            opacity: 0.7;
+        }
+
+        /* Finale Frage Styles */
+        .final-container {
+            text-align: center;
+            animation: fadeIn 0.8s ease;
+        }
+
+        .final-question {
+            font-size: 32px;
+            font-weight: 700;
+            color: var(--text-color);
+            margin-bottom: 40px;
+            line-height: 1.3;
+        }
+
+        .final-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+
+        .yes-btn {
+            padding: 20px 60px;
+            font-size: 24px;
+            font-family: 'Poppins', sans-serif;
+            font-weight: 700;
+            border: none;
+            border-radius: 16px;
+            background: linear-gradient(135deg, #FF6B9D, #FF4081);
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            animation: pulse 2s infinite;
+            box-shadow: 0 10px 30px rgba(255, 107, 157, 0.4);
+        }
+
+        .yes-btn:hover {
+            transform: scale(1.1);
+            box-shadow: 0 15px 40px rgba(255, 107, 157, 0.5);
+        }
+
+        .no-btn {
+            padding: 15px 40px;
+            font-size: 18px;
+            font-family: 'Poppins', sans-serif;
+            font-weight: 500;
+            border: 2px solid #FFB3C6;
+            border-radius: 12px;
+            background: white;
+            color: #FF6B9D;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .no-btn:hover {
+            background: #FFE5EC;
+        }
+
+        /* Success Screen */
+        .success-container {
+            text-align: center;
+            animation: fadeIn 0.8s ease;
+        }
+
+        .success-heart {
+            font-size: 80px;
+            animation: pulse 1s infinite;
+            cursor: pointer;
+            transition: transform 0.3s ease;
+        }
+
+        .success-heart:hover {
+            transform: scale(1.2);
+        }
+
+        .cat-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .speech-bubble {
+            background: white;
+            border-radius: 20px;
+            padding: 20px 25px;
+            max-width: 280px;
+            font-size: 16px;
+            font-weight: 500;
+            color: #2D3436;
+            text-align: center;
+            line-height: 1.5;
+            position: relative;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+            animation: fadeIn 0.8s ease;
+        }
+
+        .speech-bubble::after {
+            content: '';
+            position: absolute;
+            bottom: -15px;
+            left: 50%;
+            transform: translateX(-50%);
+            border-width: 15px 15px 0 15px;
+            border-style: solid;
+            border-color: white transparent transparent transparent;
+        }
+
+        /* Floating Hearts */
+        .hearts-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            overflow: hidden;
+            z-index: 1;
+            opacity: 0;
+            transition: opacity 1s ease;
+        }
+
+        body.pink-theme .hearts-container {
+            opacity: 1;
+        }
+
+        .floating-heart {
+            position: absolute;
+            font-size: 24px;
+            animation: floatUp 6s linear infinite;
+            opacity: 0.6;
+        }
+
+        @keyframes floatUp {
+            0% {
+                transform: translateY(100vh) rotate(0deg);
+                opacity: 0;
+            }
+            10% {
+                opacity: 0.6;
+            }
+            90% {
+                opacity: 0.6;
+            }
+            100% {
+                transform: translateY(-100px) rotate(360deg);
+                opacity: 0;
+            }
+        }
+
+        /* Konfetti Canvas */
+        #confetti-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 100;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .quiz-container {
+                padding: 25px;
+                margin: 10px;
+            }
+
+            .question-text {
+                font-size: 20px;
+            }
+
+            .answer-btn {
+                padding: 14px 20px;
+                font-size: 15px;
+            }
+
+            .final-question {
+                font-size: 24px;
+            }
+
+            .yes-btn {
+                padding: 16px 40px;
+                font-size: 20px;
+            }
+
+            .no-btn {
+                padding: 12px 30px;
+                font-size: 16px;
+            }
+
+            .success-title {
+                font-size: 28px;
+            }
+
+            .success-heart {
+                font-size: 60px;
+            }
+        }
+
+        /* Hidden class */
+        .hidden {
+            display: none !important;
+        }
+
+        /* No Button Messages */
+        .no-message {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: white;
+            padding: 20px 30px;
+            border-radius: 16px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+            font-size: 18px;
+            font-weight: 600;
+            color: #FF6B9D;
+            z-index: 200;
+            animation: fadeIn 0.3s ease;
+        }
+
+        /* Invitation Overlay */
+        .invitation-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 300;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.5s ease;
+        }
+
+        .invitation-overlay.show {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .invitation-card {
+            background: linear-gradient(to bottom, #FFFFFF 0%, #FEF9F9 100%);
+            border: 2px solid #FFB3C6;
+            border-radius: 20px;
+            padding: 40px;
+            max-width: 500px;
+            width: 90%;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            position: relative;
+            transform: translateY(100%);
+            opacity: 0;
+            transition: transform 1s ease-out, opacity 0.8s ease-out;
+            will-change: transform, opacity;
+        }
+
+        .invitation-overlay.show .invitation-card {
+            transform: translateY(0);
+            opacity: 1;
+            transition-delay: 0.2s;
+        }
+
+        .invitation-close {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: none;
+            border: none;
+            font-size: 28px;
+            color: #95A5A6;
+            cursor: pointer;
+            transition: color 0.3s ease;
+            line-height: 1;
+            padding: 5px;
+        }
+
+        .invitation-close:hover {
+            color: #2C3E50;
+        }
+
+        .invitation-content {
+            text-align: left;
+        }
+
+        .invitation-intro {
+            font-size: 24px;
+            font-weight: 600;
+            color: #2D3436;
+            margin-bottom: 30px;
+        }
+
+        .invitation-date {
+            font-size: 34px;
+            font-weight: 700;
+            color: #FF6B9D;
+            margin-bottom: 30px;
+        }
+
+        .location-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #34495E;
+            margin-bottom: 10px;
+        }
+
+        .location-details {
+            font-size: 20px;
+            font-weight: 400;
+            color: #2D3436;
+            line-height: 1.6;
+            margin-bottom: 30px;
+        }
+
+        .invitation-dresscode {
+            font-size: 18px;
+            font-weight: 400;
+            color: #2D3436;
+            line-height: 1.6;
+            margin-bottom: 20px;
+        }
+
+        .invitation-secret {
+            font-size: 18px;
+            font-weight: 400;
+            color: #2D3436;
+            line-height: 1.6;
+            margin-bottom: 30px;
+        }
+
+        .invitation-closing {
+            font-size: 20px;
+            font-weight: 500;
+            color: #2D3436;
+        }
+
+        /* Invitation Responsive */
+        @media (max-width: 768px) {
+            .invitation-card {
+                padding: 30px;
+            }
+
+            .invitation-intro {
+                font-size: 20px;
+            }
+
+            .invitation-date {
+                font-size: 28px;
+            }
+
+            .location-title {
+                font-size: 16px;
+            }
+
+            .location-details {
+                font-size: 18px;
+            }
+
+            .invitation-dresscode,
+            .invitation-secret {
+                font-size: 16px;
+            }
+
+            .invitation-closing {
+                font-size: 18px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .invitation-card {
+                padding: 25px;
+            }
+
+            .invitation-intro {
+                font-size: 18px;
+                margin-bottom: 25px;
+            }
+
+            .invitation-date {
+                font-size: 26px;
+                margin-bottom: 25px;
+            }
+
+            .location-details {
+                font-size: 17px;
+                margin-bottom: 25px;
+            }
+
+            .invitation-dresscode,
+            .invitation-secret {
+                font-size: 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Floating Hearts Container -->
+    <div class="hearts-container" id="hearts-container"></div>
+
+    <!-- Confetti Canvas -->
+    <canvas id="confetti-canvas"></canvas>
+
+    <!-- Quiz Container -->
+    <div class="quiz-container" id="quiz-container">
+        <!-- Progress Bar -->
+        <div class="progress-container" id="progress-container">
+            <div class="progress-text">
+                <span id="progress-label">Frage 1 von 5</span>
+                <span id="progress-percent">0%</span>
+            </div>
+            <div class="progress-bar">
+                <div class="progress-fill" id="progress-fill"></div>
+            </div>
+        </div>
+
+        <!-- Question Container -->
+        <div class="question-container" id="question-container">
+            <div class="question-number" id="question-number">Frage 1</div>
+            <h2 class="question-text" id="question-text"></h2>
+            <div class="answers-container" id="answers-container"></div>
+        </div>
+
+        <!-- Final Question Container -->
+        <div class="final-container hidden" id="final-container">
+            <h2 class="final-question">Kann ich dein Valentin sein?</h2>
+            <div class="final-buttons">
+                <button class="yes-btn" id="yes-btn">Ja</button>
+                <button class="no-btn" id="no-btn">Nein</button>
+            </div>
+        </div>
+
+        <!-- Success Container -->
+        <div class="success-container hidden" id="success-container">
+            <div class="cat-container" id="cat-container">
+                <div class="speech-bubble">Meow Meow Ma'am, Sie haben eine Einladung. Klicken Sie auf mich, um sie zu öffnen!</div>
+                <div class="success-heart" id="clickable-cat">🐱</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Invitation Overlay -->
+    <div class="invitation-overlay" id="invitationOverlay" role="dialog" aria-labelledby="invitationTitle" aria-describedby="invitationContent">
+        <div class="invitation-card">
+            <button class="invitation-close" id="closeInvitation" aria-label="Schließen">&times;</button>
+
+            <div class="invitation-content" id="invitationContent">
+                <p class="invitation-intro" id="invitationTitle">Hast ja gedrückt. Besser ist es.</p>
+
+                <p class="invitation-date">21. Februar 2025</p>
+
+                <div class="invitation-location">
+                    <p class="location-title">Location:</p>
+                    <p class="location-details">
+                        Sushi Do (Hannover)<br>
+                        oder Akari (Hamburg)
+                    </p>
+                </div>
+
+                <p class="invitation-dresscode">Zieh dich schick an.</p>
+
+                <p class="invitation-secret">Programm davor bleibt geheim.</p>
+
+                <p class="invitation-closing">MEOW MEOW MEOW!</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Quiz Questions Data
+        const quizData = [
+            {
+                question: "Wo habe ich dich gefragt, ob du meine Freundin sein willst?",
+                correct: "Schlachte",
+                wrong: ["Am Weser-Ufer", "Im Bürgerpark", "Auf der Sögestraße"]
+            },
+            {
+                question: "Was war der erste Cocktail-Mix, den wir gemacht haben?",
+                correct: "Soju + Sprite + Yakult",
+                wrong: ["Soju + Yuzuka + Yakult", "Sake + Sprite + Limette", "Soju + Limette + Minze + Sprite"]
+            },
+            {
+                question: "Wo waren wir beim ersten Jahrestag essen?",
+                correct: "Sushi Do",
+                wrong: ["Face Sushi", "Oji Long", "Ako Sushi"]
+            },
+            {
+                question: "Wann waren wir zusammen mit meinen Cousins bei der Ideenexpo?",
+                correct: "Juli 2022",
+                wrong: ["Juli 2023", "Juni 2024", "Mai 2022"]
+            },
+            {
+                question: "Bei welchem Museum waren wir als erstes, nachdem wir zusammengekommen sind?",
+                correct: "Kunst im Tunnel Düsseldorf",
+                wrong: ["Kunsthalle Bremen", "Sprengelmuseum Hannover", "K21 Düsseldorf"]
+            }
+        ];
+
+        // State
+        let currentQuestion = 0;
+        let noButtonClicks = 0;
+        const noMessages = [
+            "Bist du sicher? 🥺",
+            "Wirklich? 💔",
+            "Denk nochmal nach... 🤔",
+            "Das kannst du nicht ernst meinen! 😢",
+            "Versuch's nochmal! 💕"
+        ];
+
+        // DOM Elements
+        const progressContainer = document.getElementById('progress-container');
+        const progressLabel = document.getElementById('progress-label');
+        const progressPercent = document.getElementById('progress-percent');
+        const progressFill = document.getElementById('progress-fill');
+        const questionContainer = document.getElementById('question-container');
+        const questionNumber = document.getElementById('question-number');
+        const questionText = document.getElementById('question-text');
+        const answersContainer = document.getElementById('answers-container');
+        const finalContainer = document.getElementById('final-container');
+        const successContainer = document.getElementById('success-container');
+        const yesBtn = document.getElementById('yes-btn');
+        const noBtn = document.getElementById('no-btn');
+        const heartsContainer = document.getElementById('hearts-container');
+
+        // Initialize Quiz
+        function initQuiz() {
+            createFloatingHearts();
+            loadQuestion();
+            setupFinalButtons();
+            setupInvitationEvents();
+        }
+
+        // Create Floating Hearts
+        function createFloatingHearts() {
+            for (let i = 0; i < 15; i++) {
+                const heart = document.createElement('div');
+                heart.className = 'floating-heart';
+                heart.innerHTML = ['💕', '💗', '💖', '💝', '❤️'][Math.floor(Math.random() * 5)];
+                heart.style.left = Math.random() * 100 + '%';
+                heart.style.animationDelay = Math.random() * 6 + 's';
+                heart.style.fontSize = (Math.random() * 20 + 16) + 'px';
+                heartsContainer.appendChild(heart);
+            }
+        }
+
+        // Shuffle Array
+        function shuffleArray(array) {
+            const shuffled = [...array];
+            for (let i = shuffled.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+            }
+            return shuffled;
+        }
+
+        // Load Question
+        function loadQuestion() {
+            const data = quizData[currentQuestion];
+
+            // Update progress
+            const progress = (currentQuestion / quizData.length) * 100;
+            progressLabel.textContent = `Frage ${currentQuestion + 1} von ${quizData.length}`;
+            progressPercent.textContent = `${Math.round(progress)}%`;
+            progressFill.style.width = progress + '%';
+
+            // Update question
+            questionNumber.textContent = `Frage ${currentQuestion + 1}`;
+            questionText.textContent = data.question;
+
+            // Create shuffled answers
+            const allAnswers = shuffleArray([data.correct, ...data.wrong]);
+            answersContainer.innerHTML = '';
+
+            allAnswers.forEach(answer => {
+                const btn = document.createElement('button');
+                btn.className = 'answer-btn';
+                btn.textContent = answer;
+                btn.addEventListener('click', () => handleAnswer(btn, answer === data.correct));
+                answersContainer.appendChild(btn);
+            });
+
+            // Animate in
+            questionContainer.style.animation = 'none';
+            setTimeout(() => {
+                questionContainer.style.animation = 'fadeIn 0.5s ease';
+            }, 10);
+        }
+
+        // Handle Answer
+        function handleAnswer(button, isCorrect) {
+            const buttons = answersContainer.querySelectorAll('.answer-btn');
+            buttons.forEach(btn => btn.disabled = true);
+
+            if (isCorrect) {
+                button.classList.add('correct');
+                setTimeout(() => {
+                    currentQuestion++;
+                    if (currentQuestion < quizData.length) {
+                        loadQuestion();
+                    } else {
+                        showFinalQuestion();
+                    }
+                }, 1000);
+            } else {
+                button.classList.add('wrong');
+                setTimeout(() => {
+                    button.classList.remove('wrong');
+                    buttons.forEach(btn => btn.disabled = false);
+                }, 800);
+            }
+        }
+
+        // Show Final Question
+        function showFinalQuestion() {
+            // Update progress to 100%
+            progressLabel.textContent = 'Geschafft!';
+            progressPercent.textContent = '100%';
+            progressFill.style.width = '100%';
+
+            // Switch to pink theme
+            document.body.classList.add('pink-theme');
+
+            // Hide question, show final
+            setTimeout(() => {
+                questionContainer.classList.add('hidden');
+                progressContainer.classList.add('hidden');
+                finalContainer.classList.remove('hidden');
+            }, 800);
+        }
+
+        // Setup Final Buttons
+        function setupFinalButtons() {
+            yesBtn.addEventListener('click', showSuccess);
+
+            noBtn.addEventListener('click', handleNoClick);
+            noBtn.addEventListener('mouseover', handleNoHover);
+        }
+
+        // Handle No Click
+        function handleNoClick() {
+            showNoMessage();
+            shrinkNoButton();
+        }
+
+        // Handle No Hover
+        function handleNoHover() {
+            if (noButtonClicks > 0) {
+                moveNoButton();
+            }
+        }
+
+        // Show No Message
+        function showNoMessage() {
+            const message = document.createElement('div');
+            message.className = 'no-message';
+            message.textContent = noMessages[Math.min(noButtonClicks, noMessages.length - 1)];
+            document.body.appendChild(message);
+
+            setTimeout(() => {
+                message.remove();
+            }, 1500);
+
+            noButtonClicks++;
+        }
+
+        // Shrink No Button
+        function shrinkNoButton() {
+            const currentSize = parseFloat(getComputedStyle(noBtn).fontSize);
+            if (currentSize > 10) {
+                noBtn.style.fontSize = (currentSize - 2) + 'px';
+                noBtn.style.padding = `${Math.max(8, 15 - noButtonClicks * 2)}px ${Math.max(15, 40 - noButtonClicks * 5)}px`;
+            }
+        }
+
+        // Move No Button
+        function moveNoButton() {
+            const container = finalContainer.getBoundingClientRect();
+            const btn = noBtn.getBoundingClientRect();
+
+            const maxX = container.width - btn.width - 40;
+            const maxY = 100;
+
+            const newX = Math.random() * maxX - maxX / 2;
+            const newY = Math.random() * maxY - maxY / 2;
+
+            noBtn.style.transform = `translate(${newX}px, ${newY}px)`;
+        }
+
+        // Show Success
+        function showSuccess() {
+            finalContainer.classList.add('hidden');
+            successContainer.classList.remove('hidden');
+            launchConfetti();
+        }
+
+        // Show Invitation
+        function showInvitation() {
+            const overlay = document.getElementById('invitationOverlay');
+            overlay.classList.add('show');
+        }
+
+        // Close Invitation
+        function closeInvitation() {
+            const overlay = document.getElementById('invitationOverlay');
+            overlay.classList.remove('show');
+        }
+
+        // Setup Invitation Events
+        function setupInvitationEvents() {
+            const overlay = document.getElementById('invitationOverlay');
+            const closeBtn = document.getElementById('closeInvitation');
+            const clickableCat = document.getElementById('clickable-cat');
+
+            // Open invitation via cat click
+            clickableCat.addEventListener('click', showInvitation);
+
+            // Close via backdrop click
+            overlay.addEventListener('click', (e) => {
+                if (e.target === overlay) {
+                    closeInvitation();
+                }
+            });
+
+            // Close via button
+            closeBtn.addEventListener('click', closeInvitation);
+
+            // Close via ESC key
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape' && overlay.classList.contains('show')) {
+                    closeInvitation();
+                }
+            });
+        }
+
+        // Confetti Animation
+        function launchConfetti() {
+            const canvas = document.getElementById('confetti-canvas');
+            const ctx = canvas.getContext('2d');
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+
+            const confetti = [];
+            const colors = ['#FF6B9D', '#FFB3C6', '#FF85A2', '#FF4081', '#FFE5EC', '#E91E63', '#F48FB1'];
+
+            for (let i = 0; i < 150; i++) {
+                confetti.push({
+                    x: Math.random() * canvas.width,
+                    y: Math.random() * canvas.height - canvas.height,
+                    w: Math.random() * 10 + 5,
+                    h: Math.random() * 6 + 3,
+                    color: colors[Math.floor(Math.random() * colors.length)],
+                    speed: Math.random() * 3 + 2,
+                    angle: Math.random() * 360,
+                    spin: Math.random() * 10 - 5
+                });
+            }
+
+            function animate() {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+                let stillFalling = false;
+                confetti.forEach(c => {
+                    if (c.y < canvas.height) {
+                        stillFalling = true;
+                        c.y += c.speed;
+                        c.x += Math.sin(c.angle * Math.PI / 180) * 2;
+                        c.angle += c.spin;
+
+                        ctx.save();
+                        ctx.translate(c.x + c.w / 2, c.y + c.h / 2);
+                        ctx.rotate(c.angle * Math.PI / 180);
+                        ctx.fillStyle = c.color;
+                        ctx.fillRect(-c.w / 2, -c.h / 2, c.w, c.h);
+                        ctx.restore();
+                    }
+                });
+
+                if (stillFalling) {
+                    requestAnimationFrame(animate);
+                }
+            }
+
+            animate();
+        }
+
+        // Window resize handler for confetti canvas
+        window.addEventListener('resize', () => {
+            const canvas = document.getElementById('confetti-canvas');
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        });
+
+        // Start Quiz
+        initQuiz();
+    </script>
+</body>
+</html>
